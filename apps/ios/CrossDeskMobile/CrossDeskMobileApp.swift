@@ -1,49 +1,42 @@
 import SwiftUI
 import UIKit
 import Darwin
+import Foundation
 
-/// Writes launch breadcrumbs to Documents/crossdesk-launch.log so a crash on an
-/// older iOS build can be diagnosed from the Files app without a Mac.
 private var launchTraceFD: Int32 = -1
 
+func launchTraceWrite(_ text: String) {
+    guard launchTraceFD >= 0 else { return }
+    let line = text + "\n"
+    line.withCString { pointer in
+        _ = Darwin.write(launchTraceFD, pointer, strlen(pointer))
+    }
+}
+
+/// Appends launch breadcrumbs to Documents/crossdesk-launch.log.
+/// The file is visible in the Files app because UIFileSharingEnabled is set.
 enum LaunchTrace {
-    private static let path: String = {
-        let fm = FileManager.default
-        let dir = fm.urls(for: .documentDirectory, in: .userDomainMask).first
+    static let filePath: String = {
+        let manager = FileManager.default
+        let dir = manager.urls(for: .documentDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
         return dir.appendingPathComponent("crossdesk-launch.log").path
     }()
 
     static func install() {
-        launchTraceFD = open(path, O_WRONLY | O_CREAT | O_APPEND, 0o644)
-        write("=== crossdesk launch trace v1 ===")
-        write("ios=\(UIDevice.current.systemVersion) model=\(UIDevice.current.model) name=\(UIDevice.current.name)")
+        launchTraceFD = open(filePath, O_WRONLY | O_CREAT | O_APPEND, 0o644)
+        write("=== crossdesk launch trace v2 (\(Date().timeIntervalSince1970)) ===")
+        write("ios=\(UIDevice.current.systemVersion) model=\(UIDevice.current.model)")
         write("bundle=\(Bundle.main.bundleIdentifier ?? "-") minos=\(Bundle.main.infoDictionary?["MinimumOSVersion"] ?? "-")")
-        NSSetUncaughtExceptionHandler { exception in
-            let frames = exception.callStackSymbols.joined(separator: "\n")
-            write("UNCAUGHT \(exception.name.rawValue): \(exception.reason ?? "-")\n\(frames)")
-        }
-        for sig in [SIGABRT, SIGSEGV, SIGBUS, SIGILL, SIGTRAP, SIGFPE] {
-            signal(sig) { received in
-                let frames = Thread.callStackSymbols.joined(separator: "\n")
-                write("\nSIGNAL \(received)\n\(frames)")
-                Darwin.close(launchTraceFD)
-                exit(128 + received)
-            }
-        }
-    }
-
-    static func log(_ tag: String) {
-        let thread = Thread.isMainThread ? "main" : (Thread.current.name ?? "bg")
-        write("[\(Date().timeIntervalSince1970)] \(tag) thread=\(thread)")
     }
 
     static func write(_ text: String) {
-        guard launchTraceFD >= 0 else { return }
-        let line = text + "\n"
-        line.withCString { buffer in
-            _ = Darwin.write(launchTraceFD, buffer, strlen(buffer))
-        }
+        launchTraceWrite(text)
+    }
+
+    static func log(_ tag: String) {
+        let thread = Thread.isMainThread ? "main" : "bg"
+        launchTraceWrite("[\(Date().timeIntervalSince1970)] \(tag) thread=\(thread)")
     }
 }
 
