@@ -16,16 +16,34 @@ enum AppOrientation {
         DispatchQueue.main.async {
             CrossDeskAppDelegate.supportedOrientations = orientations
 
-            for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
-                scene.windows.forEach {
-                    $0.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+            if #available(iOS 16.0, *) {
+                for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
+                    scene.windows.forEach {
+                        $0.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+                    }
+                    scene.requestGeometryUpdate(
+                        .iOS(interfaceOrientations: orientations)
+                    ) { error in
+                        NSLog("CrossDesk orientation update failed: %@", error.localizedDescription)
+                    }
                 }
-                scene.requestGeometryUpdate(
-                    .iOS(interfaceOrientations: orientations)
-                ) { error in
-                    NSLog("CrossDesk orientation update failed: %@", error.localizedDescription)
+            } else {
+                // iOS 15 没有 requestGeometryUpdate，用 KVC 强制旋转 + 通知系统重算
+                if let target = singleOrientation(for: orientations) {
+                    UIDevice.current.setValue(target.rawValue, forKey: "orientation")
                 }
+                UIViewController.attemptRotationToDeviceOrientation()
             }
+        }
+    }
+
+    private static func singleOrientation(for mask: UIInterfaceOrientationMask) -> UIInterfaceOrientation? {
+        switch mask {
+        case .portrait: return .portrait
+        case .portraitUpsideDown: return .portraitUpsideDown
+        case .landscapeLeft: return .landscapeLeft
+        case .landscapeRight: return .landscapeRight
+        default: return nil
         }
     }
 }

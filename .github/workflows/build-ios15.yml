@@ -1,0 +1,55 @@
+name: build-ios15
+
+# 构建可安装到 iOS 15.0 的 CrossDesk 未签名 IPA（TrollStore / Sideloadly 安装）
+on:
+  workflow_dispatch:
+  push:
+    branches: [ ios15, ios-support, main ]
+
+jobs:
+  ios15:
+    runs-on: macos-14
+    timeout-minutes: 240
+    steps:
+      - name: Checkout (with minirtc submodule)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Show toolchain
+        run: |
+          uname -m
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+          brew install xmake
+          xmake --version
+
+      - name: Guard deployment target is 15.0
+        run: |
+          set -e
+          grep -c 'IPHONEOS_DEPLOYMENT_TARGET = 15.0;' apps/ios/CrossDeskMobile.xcodeproj/project.pbxproj
+          if grep -q 'IPHONEOS_DEPLOYMENT_TARGET = 16.0;' apps/ios/CrossDeskMobile.xcodeproj/project.pbxproj; then
+            echo "pbxproj still targets 16.0"; exit 1
+          fi
+          if grep -q 'NavigationStack' apps/ios/CrossDeskMobile/ContentView.swift; then
+            echo "NavigationStack still present"; exit 1
+          fi
+          if grep -q -- '--target_minver=16.0' apps/ios/scripts/build_minirtc_ios.sh; then
+            echo "minirtc still builds with 16.0"; exit 1
+          fi
+
+      - name: Build unsigned IPA
+        env:
+          XMAKE_BIN: /opt/homebrew/bin/xmake
+        run: |
+          chmod +x apps/ios/scripts/build_ios15_unsigned.sh apps/ios/scripts/build_minirtc_ios.sh
+          ./apps/ios/scripts/build_ios15_unsigned.sh "$RUNNER_TEMP/build-ios15"
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: CrossDeskMobile-iOS15-unsigned
+          path: ${{ runner.temp }}/build-ios15/*.ipa
+          if-no-files-found: error
+          retention-days: 14

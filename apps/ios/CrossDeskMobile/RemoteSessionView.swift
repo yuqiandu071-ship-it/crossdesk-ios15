@@ -1141,9 +1141,7 @@ private struct FloatingSessionMenu: View {
                             .frame(width: 60)
                     }
                     if let file = session.receivedFileURL {
-                        ShareLink(item: file) {
-                            Image(systemName: "square.and.arrow.up")
-                        }
+                        FileShareButton(url: file)
                     }
                 }
             }
@@ -1360,4 +1358,32 @@ private struct RemoteIBeamShape: Shape {
         path.addLine(to: CGPoint(x: rect.maxX - 5, y: bottom))
         return path
     }
+}
+
+// MARK: - iOS 15 兼容：ShareLink 需要 iOS 16，改用 UIActivityViewController
+
+private struct FileShareButton: View {
+    let url: URL
+    @State private var presenting = false
+
+    var body: some View {
+        Button {
+            presenting = true
+        } label: {
+            Image(systemName: "square.and.arrow.up")
+        }
+        .sheet(isPresented: $presenting) {
+            ActivityView(activityItems: [url])
+        }
+    }
+}
+
+struct ActivityView: UIViewControllerRepresentable {
+    let activityItems: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
 }

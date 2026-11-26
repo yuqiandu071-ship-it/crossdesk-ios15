@@ -219,13 +219,11 @@ private struct ConnectionHomeView: View {
                 session.connect(password: promptPassword,
                                 rememberPassword: promptRememberPassword)
             }
-            .presentationDetents([.height(340)])
-            .presentationDragIndicator(.visible)
+            .modifier(CDSheetPresentation(style: .fixedHeight(340)))
         }
         .sheet(isPresented: $settingsVisible) {
             ServerSettingsView(session: session)
-                .presentationDetents([.fraction(0.80)])
-                .presentationDragIndicator(.visible)
+                .modifier(CDSheetPresentation(style: .fraction(0.80)))
         }
         .alert("设备离线", isPresented: Binding(
             get: { session.deviceOfflineAlertVisible },
@@ -664,7 +662,7 @@ private struct ServerSettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
                 Section("鼠标控制") {
                     Picker("控制模式", selection: $session.mouseControlMode) {
@@ -747,6 +745,36 @@ private struct ServerSettingsView: View {
                     Button("取消") { dismiss() }
                 }
             }
+        }
+    }
+}
+
+// MARK: - iOS 15 兼容：presentationDetents / presentationDragIndicator 需要 iOS 16
+
+/// iOS 16+ 走原生 detents；iOS 15 退化为默认全高 sheet，功能不受影响。
+struct CDSheetPresentation: ViewModifier {
+    enum Style {
+        case fixedHeight(CGFloat)
+        case fraction(CGFloat)
+    }
+
+    let style: Style
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 16.0, *) {
+            switch style {
+            case .fixedHeight(let height):
+                content
+                    .presentationDetents([.height(height)])
+                    .presentationDragIndicator(.visible)
+            case .fraction(let fraction):
+                content
+                    .presentationDetents([.fraction(fraction)])
+                    .presentationDragIndicator(.visible)
+            }
+        } else {
+            content
         }
     }
 }
