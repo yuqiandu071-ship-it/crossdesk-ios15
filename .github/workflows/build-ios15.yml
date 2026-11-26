@@ -63,6 +63,8 @@ jobs:
       - name: Build native MinRTC archives
         timeout-minutes: 90
         shell: bash
+        env:
+          CROSSDESK_TARGET_MINVER: "16.0"
         run: |
           set -o pipefail
           git config --global url."https://github.com/videolan/dav1d".insteadOf "https://code.videolan.org/videolan/dav1d"
@@ -128,13 +130,13 @@ jobs:
           mkdir -p diagnostics
           cp "${RUNNER_TEMP}/native-build.log" diagnostics/ 2>/dev/null || true
           cp "${RUNNER_TEMP}/app-build.log" diagnostics/ 2>/dev/null || true
-          find apps/ios/.xmake "$HOME/Library/Caches/xmake" "$HOME/.xmake" -name 'install.txt' -path '*failed*' -print0 2>/dev/null \
-            | while IFS= read -r -d '' f; do
+          find apps/ios/.xmake "$HOME/Library/Caches/xmake" "$HOME/.xmake" -name 'install.txt' -path '*failed*' 2>/dev/null \
+            | while IFS= read -r f; do
                 safe="$(echo "$f" | sed 's#[^/]*/\.xmake/##; s#.*/cache/packages/##; s#/#_#g')"
                 cp "$f" "diagnostics/$safe" 2>/dev/null || true
               done
-          find apps/ios/.xmake "$HOME/Library/Caches/xmake" -name 'meson-log.txt' -print0 2>/dev/null \
-            | while IFS= read -r -d '' f; do
+          find apps/ios/.xmake "$HOME/Library/Caches/xmake" -name 'meson-log.txt' 2>/dev/null \
+            | while IFS= read -r f; do
                 safe="$(echo "$f" | sed 's#[^/]*/\.xmake/##; s#.*/cache/packages/##; s#/#_#g')"
                 cp "$f" "diagnostics/$safe" 2>/dev/null || true
               done
@@ -147,8 +149,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f diagnostics
-          git commit -m "ci: diagnostics for run ${GITHUB_RUN_ID}" || true
+          git -c core.autocrlf=false commit -m "ci: diagnostics for run ${GITHUB_RUN_ID}" || true
           git push origin HEAD:ios15 || true
+          true
 
       - name: Upload diagnostics
         if: failure() || cancelled()
