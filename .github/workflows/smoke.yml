@@ -6,17 +6,16 @@ on:
     branches: [ ios15 ]
 
 jobs:
-  linux:
-    runs-on: ubuntu-latest
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-13, macos-14, macos-15, macos-15-intel ]
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
     steps:
       - run: |
-          echo "linux ok"
-          uname -a
-
-  mac:
-    runs-on: macos-14
-    steps:
-      - run: |
-          echo "mac ok"
+          echo "runner=${{ matrix.os }}"
           uname -m
           sw_vers
+          xcodebuild -version
