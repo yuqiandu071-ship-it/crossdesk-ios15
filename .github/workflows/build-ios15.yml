@@ -1,55 +1,147 @@
 name: build-ios15
 
-# Build an unsigned IPA of CrossDesk targeting iOS 15.0 (install via TrollStore / Sideloadly)
 on:
-  workflow_dispatch:
   push:
-    branches: [ ios15, ios-support, main ]
+    branches: [ios15]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  ios15:
+  build:
+    name: Build iOS15 unsigned IPA
     runs-on: macos-15
-    timeout-minutes: 240
+    timeout-minutes: 150
+    env:
+      CONFIGURATION: Release
+      PLATFORM_NAME: iphoneos
+      CURRENT_ARCH: arm64
+      CROSSDESK_NATIVE_VERBOSE: "1"
+
     steps:
-      - name: Checkout (with minirtc submodule)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 1
 
-      - name: Show toolchain
+      - name: Guard ios15 tree
+        shell: bash
         run: |
-          uname -m
+          set -euo pipefail
+          PBX=apps/ios/CrossDeskMobile.xcodeproj/project.pbxproj
+          test "$(grep -c 'IPHONEOS_DEPLOYMENT_TARGET = 15.0;' "$PBX")" = "4"
+          test "$(grep -c 'IPHONEOS_DEPLOYMENT_TARGET = 16.0;' "$PBX" || true)" = "0"
+          test "$(grep -rc 'NavigationStack' apps/ios/CrossDeskMobile/*.swift | awk -F: '{s+=$2} END {print s+0}')" = "0"
+          test "$(grep -c -- '--target_minver=16.0' apps/ios/scripts/build_minirtc_ios.sh || true)" = "0"
+          echo "guard: pbxproj 15.0 x4, no NavigationStack, minirtc target 15.0"
+
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install python build tools
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+
+      - name: Install xmake 3.1.1
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: "3.1.1"
+          actions-cache-folder: ${{ runner.temp }}/xmake-toolchain
+
+      - name: Toolchain info
+        shell: bash
+        run: |
+          xmake --version
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
-          brew install xmake
-          xmake --version
 
-      - name: Guard deployment target is 15.0
+      - name: Build native MinRTC archives
+        timeout-minutes: 90
+        shell: bash
         run: |
-          set -e
-          grep -c 'IPHONEOS_DEPLOYMENT_TARGET = 15.0;' apps/ios/CrossDeskMobile.xcodeproj/project.pbxproj
-          if grep -q 'IPHONEOS_DEPLOYMENT_TARGET = 16.0;' apps/ios/CrossDeskMobile.xcodeproj/project.pbxproj; then
-            echo "pbxproj still targets 16.0"; exit 1
-          fi
-          if grep -q 'NavigationStack' apps/ios/CrossDeskMobile/ContentView.swift; then
-            echo "NavigationStack still present"; exit 1
-          fi
-          if grep -q -- '--target_minver=16.0' apps/ios/scripts/build_minirtc_ios.sh; then
-            echo "minirtc still builds with 16.0"; exit 1
-          fi
+          set -o pipefail
+          apps/ios/scripts/build_minirtc_ios.sh 2>&1 | tee "${RUNNER_TEMP}/native-build.log"
+          ls -l apps/ios/Vendor/iphoneos/Release/libCrossDeskMiniRTC.a
 
-      - name: Build unsigned IPA
-        env:
-          XMAKE_BIN: /opt/homebrew/bin/xmake
+      - name: Build CrossDeskMobile
+        timeout-minutes: 40
+        shell: bash
         run: |
-          chmod +x apps/ios/scripts/build_ios15_unsigned.sh apps/ios/scripts/build_minirtc_ios.sh
-          ./apps/ios/scripts/build_ios15_unsigned.sh "$RUNNER_TEMP/build-ios15"
+          set -o pipefail
+          xcodebuild \
+            -project apps/ios/CrossDeskMobile.xcodeproj \
+            -scheme CrossDeskMobile \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "${RUNNER_TEMP}/dd" \
+            ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="" \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build 2>&1 | tee "${RUNNER_TEMP}/app-build.log"
+
+      - name: Verify and package IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="${RUNNER_TEMP}/dd/Build/Products/Release-iphoneos/CrossDeskMobile.app"
+          EXE="${APP}/CrossDeskMobile"
+          test -x "${EXE}"
+          xcrun vtool -show-build "${EXE}" | tee "${RUNNER_TEMP}/vtool.txt"
+          grep -q 'minos 15.0' "${RUNNER_TEMP}/vtool.txt"
+          MINOS="$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "${APP}/Info.plist")"
+          echo "Info.plist MinimumOSVersion=${MINOS}"
+          test "${MINOS}" = "15.0"
+          rm -rf "${RUNNER_TEMP}/Payload"
+          mkdir -p "${RUNNER_TEMP}/Payload"
+          cp -R "${APP}" "${RUNNER_TEMP}/Payload/"
+          xattr -cr "${RUNNER_TEMP}/Payload" || true
+          ( cd "${RUNNER_TEMP}" && zip -qry "${GITHUB_WORKSPACE}/CrossDeskMobile-iOS15-unsigned.ipa" Payload )
+          shasum -a 256 "${GITHUB_WORKSPACE}/CrossDeskMobile-iOS15-unsigned.ipa" | tee "${RUNNER_TEMP}/ipa.sha256"
+          ls -l "${GITHUB_WORKSPACE}/CrossDeskMobile-iOS15-unsigned.ipa"
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: CrossDeskMobile-iOS15-unsigned
-          path: ${{ runner.temp }}/build-ios15/*.ipa
+          path: CrossDeskMobile-iOS15-unsigned.ipa
           if-no-files-found: error
-          retention-days: 14
+
+      - name: Collect diagnostics
+        if: failure() || cancelled()
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p diagnostics
+          cp "${RUNNER_TEMP}/native-build.log" diagnostics/ 2>/dev/null || true
+          cp "${RUNNER_TEMP}/app-build.log" diagnostics/ 2>/dev/null || true
+          find apps/ios/.xmake/packages -name 'install.txt' -path '*failed*' -print0 2>/dev/null \
+            | while IFS= read -r -d '' f; do
+                safe="$(echo "$f" | sed 's#apps/ios/.xmake/packages/##; s#/#_#g')"
+                cp "$f" "diagnostics/$safe" 2>/dev/null || true
+              done
+          find apps/ios/.xmake -name 'meson-log.txt' -print0 2>/dev/null \
+            | while IFS= read -r -d '' f; do
+                safe="$(echo "$f" | sed 's#apps/ios/.xmake/##; s#/#_#g')"
+                cp "$f" "diagnostics/$safe" 2>/dev/null || true
+              done
+          ls -l diagnostics || true
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f diagnostics
+          git commit -m "ci: diagnostics for run ${GITHUB_RUN_ID}" || true
+          git push origin HEAD:ios15 || true
+
+      - name: Upload diagnostics
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios15-diagnostics
+          path: diagnostics
+          if-no-files-found: ignore
