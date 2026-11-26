@@ -4,6 +4,11 @@ on:
   push:
     branches: [ios15]
   workflow_dispatch:
+    inputs:
+      no_isolation:
+        description: 'Run xmake without env -i (diagnostic)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -18,6 +23,8 @@ jobs:
       PLATFORM_NAME: iphoneos
       CURRENT_ARCH: arm64
       CROSSDESK_NATIVE_VERBOSE: "1"
+      CROSSDESK_XMAKE_TMPDIR: ${{ runner.temp }}/xmake-tmp
+      CROSSDESK_XMAKE_NO_ISOLATION: ${{ inputs.no_isolation && '1' || '0' }}
 
     steps:
       - name: Checkout
@@ -140,6 +147,7 @@ jobs:
                 safe="$(echo "$f" | sed 's#[^/]*/\.xmake/##; s#.*/cache/packages/##; s#/#_#g')"
                 cp "$f" "diagnostics/$safe" 2>/dev/null || true
               done
+          find "${RUNNER_TEMP}/xmake-tmp" -name '*.ini' 2>/dev/null | while IFS= read -r f; do cp "$f" "diagnostics/native_$(basename "$f")" 2>/dev/null || true; done
           find apps/ios/.xmake "$HOME/Library/Caches/xmake" "$HOME/.xmake" -name 'configs_file.txt' 2>/dev/null \
             | while IFS= read -r f; do
                 safe="$(echo "$f" | sed 's#[^/]*/\.xmake/##; s#.*/cache/packages/##; s#/#_#g')"

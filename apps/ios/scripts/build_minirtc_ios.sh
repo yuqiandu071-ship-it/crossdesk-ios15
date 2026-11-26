@@ -51,11 +51,23 @@ fi
 # pass the iOS target exclusively through its command-line configuration.
 XMAKE_DEVELOPER_DIR="${DEVELOPER_DIR:-$(xcode-select -p)}"
 XMAKE_TOOLCHAIN_BIN="${XMAKE_DEVELOPER_DIR}/Toolchains/XcodeDefault.xctoolchain/usr/bin"
+XMAKE_TMP_ROOT="${CROSSDESK_XMAKE_TMPDIR:-${TMPDIR:-/tmp}/xmake-tmp}"
+mkdir -p "${XMAKE_TMP_ROOT}"
+
 run_xmake() {
+  if [[ "${CROSSDESK_XMAKE_NO_ISOLATION:-0}" == "1" ]]; then
+    export PATH="${XMAKE_TOOLCHAIN_BIN}:${PATH}"
+    export TMPDIR="${XMAKE_TMP_ROOT}"
+    export XMAKE_PKG_INSTALLDIR
+    export CROSSDESK_SOURCE_DIR="${REPO_DIR}"
+    unset SDKROOT CPATH LIBRARY_PATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
+    "${XMAKE_BIN}" "$@"
+    return
+  fi
   /usr/bin/env -i \
     HOME="${HOME}" \
     PATH="${XMAKE_TOOLCHAIN_BIN}:${PATH}" \
-    TMPDIR="${TMPDIR:-/tmp}" \
+    TMPDIR="${XMAKE_TMP_ROOT}" \
     USER="${USER:-}" \
     LOGNAME="${LOGNAME:-${USER:-}}" \
     LANG="${LANG:-en_US.UTF-8}" \
