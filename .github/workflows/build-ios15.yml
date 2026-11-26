@@ -1,6 +1,7 @@
 name: build-ios15
 
-# 鏋勫缓鍙畨瑁呭埌 iOS 15.0 鐨?CrossDesk 鏈鍚?IPA锛圱rollStore / Sideloadly 瀹夎锛?on:
+# Build an unsigned IPA of CrossDesk targeting iOS 15.0 (install via TrollStore / Sideloadly)
+on:
   workflow_dispatch:
   push:
     branches: [ ios15, ios-support, main ]
