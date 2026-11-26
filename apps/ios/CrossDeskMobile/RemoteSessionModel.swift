@@ -443,6 +443,7 @@ final class RemoteSessionModel: NSObject, ObservableObject, CrossDeskRTCBridgeDe
 
     override init() {
         super.init()
+        LaunchTrace.log("RemoteSessionModel.init")
         bridge.delegate = self
         configureBridge()
     }

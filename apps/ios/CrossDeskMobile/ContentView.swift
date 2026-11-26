@@ -18,6 +18,7 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.2), value: session.sessionVisible)
         .preferredColorScheme(session.sessionVisible ? .dark : .light)
         .onAppear {
+            LaunchTrace.log("ContentView.onAppear")
             if !session.sessionVisible {
                 AppOrientation.update(to: .portrait)
             }
