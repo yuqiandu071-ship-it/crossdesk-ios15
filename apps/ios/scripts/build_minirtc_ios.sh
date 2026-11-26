@@ -91,7 +91,7 @@ cp "${REPO_DIR}/xmake.lua" "${WIRE_MANIFEST_FILE}"
 # configuration, compilation and inspection anchored to the MiniRTC project.
 (
   cd "${MINIRTC_DIR}"
-  run_xmake f -P "${MINIRTC_DIR}" -c -o "${MINIRTC_BUILD_DIR}" \
+  run_xmake f -v -P "${MINIRTC_DIR}" -c -o "${MINIRTC_BUILD_DIR}" \
     -p iphoneos -a arm64 -m "${MODE}" \
     --as="${XMAKE_TOOLCHAIN_BIN}/clang" \
     --target_minver=${CROSSDESK_TARGET_MINVER:-15.0} --USE_CUDA=false -y

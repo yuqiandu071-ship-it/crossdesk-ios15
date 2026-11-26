@@ -135,10 +135,15 @@ jobs:
                 safe="$(echo "$f" | sed 's#[^/]*/\.xmake/##; s#.*/cache/packages/##; s#/#_#g')"
                 cp "$f" "diagnostics/$safe" 2>/dev/null || true
               done
-          find apps/ios/.xmake "$HOME/Library/Caches/xmake" -name 'meson-log.txt' 2>/dev/null \
+          find apps/ios/.xmake "$HOME/Library/Caches/xmake" "$HOME/.xmake" -name 'meson-log.txt' 2>/dev/null \
             | while IFS= read -r f; do
                 safe="$(echo "$f" | sed 's#[^/]*/\.xmake/##; s#.*/cache/packages/##; s#/#_#g')"
                 cp "$f" "diagnostics/$safe" 2>/dev/null || true
+              done
+          find apps/ios/.xmake "$HOME/Library/Caches/xmake" "$HOME/.xmake" -name 'configs_file.txt' 2>/dev/null \
+            | while IFS= read -r f; do
+                safe="$(echo "$f" | sed 's#[^/]*/\.xmake/##; s#.*/cache/packages/##; s#/#_#g')"
+                cp "$f" "diagnostics/cross_$safe" 2>/dev/null || true
               done
           { echo "=== native-build.log tail ==="; tail -n 120 "${RUNNER_TEMP}/native-build.log" 2>/dev/null || true;
             for f in diagnostics/*; do
