@@ -51,7 +51,7 @@ jobs:
       - name: Install xmake 3.1.1
         uses: xmake-io/github-action-setup-xmake@v1
         with:
-          xmake-version: "3.1.1"
+          xmake-version: "3.1.2"
           actions-cache-folder: ${{ runner.temp }}/xmake-toolchain
 
       - name: Toolchain info
@@ -73,8 +73,18 @@ jobs:
           ln -sf /usr/bin/perl "${RUNNER_TEMP}/pbin/perl"
           export PATH="${RUNNER_TEMP}/pbin:${PATH}"
           perl -v | head -3
+          set +e
           apps/ios/scripts/build_minirtc_ios.sh 2>&1 | tee "${RUNNER_TEMP}/native-build.log"
-          ls -l apps/ios/Vendor/iphoneos/Release/libCrossDeskMiniRTC.a
+          rc=${PIPESTATUS[0]}
+          mkdir -p "${RUNNER_TEMP}/xmake-fail-logs"
+          for d in "$HOME/.xmake/cache/packages" "$HOME/Library/Caches/xmake/cache/packages"; do
+            [ -d "$d" ] || continue
+            find "$d" -name 'meson-log.txt' 2>/dev/null | while IFS= read -r f; do
+              cp "$f" "${RUNNER_TEMP}/xmake-fail-logs/$(echo "$f" | md5 -q | cut -c1-8)_meson-log.txt" 2>/dev/null || true
+            done
+          done
+          ls -l "${RUNNER_TEMP}/xmake-fail-logs" | head -20
+          exit $rc
 
       - name: Build CrossDeskMobile
         timeout-minutes: 40
@@ -131,6 +141,7 @@ jobs:
           mkdir -p diagnostics
           cp "${RUNNER_TEMP}/native-build.log" diagnostics/ 2>/dev/null || true
           cp "${RUNNER_TEMP}/app-build.log" diagnostics/ 2>/dev/null || true
+          cp "${RUNNER_TEMP}/xmake-fail-logs/"*.txt diagnostics/ 2>/dev/null || true
           find apps/ios/.xmake "$HOME/Library/Caches/xmake" "$HOME/.xmake" -name 'install.txt' -path '*failed*' 2>/dev/null \
             | while IFS= read -r f; do
                 safe="$(echo "$f" | sed 's#[^/]*/\.xmake/##; s#.*/cache/packages/##; s#/#_#g')"
