@@ -65,12 +65,19 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
+          git config --global url."https://github.com/videolan/dav1d".insteadOf "https://code.videolan.org/videolan/dav1d"
+          mkdir -p "${RUNNER_TEMP}/pbin"
+          ln -sf /usr/bin/perl "${RUNNER_TEMP}/pbin/perl"
+          export PATH="${RUNNER_TEMP}/pbin:${PATH}"
+          perl -v | head -3
           apps/ios/scripts/build_minirtc_ios.sh 2>&1 | tee "${RUNNER_TEMP}/native-build.log"
           ls -l apps/ios/Vendor/iphoneos/Release/libCrossDeskMiniRTC.a
 
       - name: Build CrossDeskMobile
         timeout-minutes: 40
         shell: bash
+        env:
+          CROSSDESK_SKIP_NATIVE_BUILD: "1"
         run: |
           set -o pipefail
           xcodebuild \
@@ -121,16 +128,21 @@ jobs:
           mkdir -p diagnostics
           cp "${RUNNER_TEMP}/native-build.log" diagnostics/ 2>/dev/null || true
           cp "${RUNNER_TEMP}/app-build.log" diagnostics/ 2>/dev/null || true
-          find apps/ios/.xmake/packages -name 'install.txt' -path '*failed*' -print0 2>/dev/null \
+          find apps/ios/.xmake "$HOME/Library/Caches/xmake" "$HOME/.xmake" -name 'install.txt' -path '*failed*' -print0 2>/dev/null \
             | while IFS= read -r -d '' f; do
-                safe="$(echo "$f" | sed 's#apps/ios/.xmake/packages/##; s#/#_#g')"
+                safe="$(echo "$f" | sed 's#[^/]*/\.xmake/##; s#.*/cache/packages/##; s#/#_#g')"
                 cp "$f" "diagnostics/$safe" 2>/dev/null || true
               done
-          find apps/ios/.xmake -name 'meson-log.txt' -print0 2>/dev/null \
+          find apps/ios/.xmake "$HOME/Library/Caches/xmake" -name 'meson-log.txt' -print0 2>/dev/null \
             | while IFS= read -r -d '' f; do
-                safe="$(echo "$f" | sed 's#apps/ios/.xmake/##; s#/#_#g')"
+                safe="$(echo "$f" | sed 's#[^/]*/\.xmake/##; s#.*/cache/packages/##; s#/#_#g')"
                 cp "$f" "diagnostics/$safe" 2>/dev/null || true
               done
+          { echo "=== native-build.log tail ==="; tail -n 120 "${RUNNER_TEMP}/native-build.log" 2>/dev/null || true;
+            for f in diagnostics/*; do
+              case "$f" in *summary.txt) continue;; esac
+              echo; echo "=== $f ==="; tail -n 120 "$f" 2>/dev/null || true;
+            done; } > diagnostics/summary.txt
           ls -l diagnostics || true
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

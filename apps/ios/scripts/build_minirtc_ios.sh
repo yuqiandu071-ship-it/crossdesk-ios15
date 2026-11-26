@@ -69,6 +69,13 @@ run_xmake() {
 
 OUTPUT_DIR="${IOS_DIR}/Vendor/iphoneos/${CONFIG_NAME}"
 OUTPUT_LIBRARY="${OUTPUT_DIR}/libCrossDeskMiniRTC.a"
+
+# Reuse the archive produced by the prebuild step (CI builds native deps
+# once, then the Xcode shell phase must not rebuild them).
+if [[ "${CROSSDESK_SKIP_NATIVE_BUILD:-0}" == "1" && -f "${OUTPUT_LIBRARY}" ]]; then
+  print "Reusing prebuilt ${OUTPUT_LIBRARY}"
+  exit 0
+fi
 MINIRTC_BUILD_DIR="${IOS_DIR}/.xmake/minirtc-build"
 MINIRTC_LIBRARY="${MINIRTC_BUILD_DIR}/iphoneos/arm64/${MODE}/libminirtc.a"
 WIRE_BUILD_DIR="${IOS_DIR}/.xmake/wire-build"
