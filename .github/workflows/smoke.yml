@@ -1,0 +1,22 @@
+name: smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ ios15 ]
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "linux ok"
+          uname -a
+
+  mac:
+    runs-on: macos-14
+    steps:
+      - run: |
+          echo "mac ok"
+          uname -m
+          sw_vers
