@@ -415,12 +415,13 @@ final class RemoteSessionModel: NSObject, ObservableObject, CrossDeskRTCBridgeDe
     private var signalConnected = false
     private var presenceIsForeground = false
     private var awaitingPresenceSnapshot = true
-    private var presenceUpdatedAt: [String: ContinuousClock.Instant] = [:]
-    private var lastPresenceRefreshAt: ContinuousClock.Instant?
+    private var presenceUpdatedAt: [String: TimeInterval] = [:]
+    private var lastPresenceRefreshAt: TimeInterval?
     private var presenceTimer: Timer?
-    private let presenceClock = ContinuousClock()
-    private static let presenceRefreshInterval: Duration = .seconds(30)
-    private static let presenceMaxAge: Duration = .seconds(60)
+    // ContinuousClock / Duration 需要 iOS 16，这里改用绝对时间秒数（iOS 2+）
+    private static var presenceNow: TimeInterval { Date().timeIntervalSinceReferenceDate }
+    private static let presenceRefreshInterval: TimeInterval = 30
+    private static let presenceMaxAge: TimeInterval = 60
 
     private struct BridgeConfiguration: Equatable {
         let host: String
@@ -637,12 +638,12 @@ final class RemoteSessionModel: NSObject, ObservableObject, CrossDeskRTCBridgeDe
         guard signalConnected, presenceIsForeground, !awaitingPresenceSnapshot,
               recentConnectionPresence[identifier] == true,
               let updatedAt = presenceUpdatedAt[identifier] else { return false }
-        return updatedAt.duration(to: presenceClock.now) < Self.presenceMaxAge
+        return Self.presenceNow - updatedAt < Self.presenceMaxAge
     }
 
     private func refreshRecentConnectionPresence() {
         guard signalConnected, presenceIsForeground else { return }
-        lastPresenceRefreshAt = presenceClock.now
+        lastPresenceRefreshAt = Self.presenceNow
         bridge.requestPresence(remoteIDs: recentConnections.map(\.remoteID),
                                subscribe: true)
     }
@@ -671,9 +672,9 @@ final class RemoteSessionModel: NSObject, ObservableObject, CrossDeskRTCBridgeDe
 
     private func maintainPresence() {
         guard signalConnected, presenceIsForeground else { return }
-        let now = presenceClock.now
+        let now = Self.presenceNow
         let expired = presenceUpdatedAt.compactMap { identifier, updatedAt in
-            updatedAt.duration(to: now) >= Self.presenceMaxAge ? identifier : nil
+            now - updatedAt >= Self.presenceMaxAge ? identifier : nil
         }
         if !expired.isEmpty {
             var updated = recentConnectionPresence
@@ -683,7 +684,7 @@ final class RemoteSessionModel: NSObject, ObservableObject, CrossDeskRTCBridgeDe
             }
             recentConnectionPresence = updated
         }
-        if lastPresenceRefreshAt.map({ $0.duration(to: now) >= Self.presenceRefreshInterval }) ?? true {
+        if lastPresenceRefreshAt.map({ now - $0 >= Self.presenceRefreshInterval }) ?? true {
             refreshRecentConnectionPresence()
         }
     }
@@ -951,7 +952,7 @@ final class RemoteSessionModel: NSObject, ObservableObject, CrossDeskRTCBridgeDe
             presenceUpdatedAt = [:]
             awaitingPresenceSnapshot = false
         }
-        let now = presenceClock.now
+        let now = Self.presenceNow
         let watched = Set(recentConnections.map(\.remoteID))
         for (remoteID, online) in presence
             where watched.contains(remoteID) || pendingPresenceRemoteID == remoteID {
