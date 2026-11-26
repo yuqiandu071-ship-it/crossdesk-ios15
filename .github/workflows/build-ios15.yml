@@ -48,11 +48,17 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
 
-      - name: Install xmake 3.1.1
+      - name: Install xmake 3.1.2
         uses: xmake-io/github-action-setup-xmake@v1
         with:
           xmake-version: "3.1.2"
           actions-cache-folder: ${{ runner.temp }}/xmake-toolchain
+
+      - name: Patch xmake meson cross file
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 apps/ios/scripts/patch_xmake_meson_cross.py
 
       - name: Toolchain info
         shell: bash
@@ -65,7 +71,7 @@ jobs:
         timeout-minutes: 90
         shell: bash
         env:
-          CROSSDESK_TARGET_MINVER: "16.0"
+          CROSSDESK_TARGET_MINVER: "15.0"
         run: |
           set -o pipefail
           git config --global url."https://github.com/videolan/dav1d".insteadOf "https://code.videolan.org/videolan/dav1d"
