@@ -4,11 +4,6 @@ on:
   push:
     branches: [ios15]
   workflow_dispatch:
-    inputs:
-      no_isolation:
-        description: 'Run xmake without env -i (diagnostic)'
-        type: boolean
-        default: false
 
 permissions:
   contents: write
@@ -24,7 +19,7 @@ jobs:
       CURRENT_ARCH: arm64
       CROSSDESK_NATIVE_VERBOSE: "1"
       CROSSDESK_XMAKE_TMPDIR: ${{ runner.temp }}/xmake-tmp
-      CROSSDESK_XMAKE_NO_ISOLATION: ${{ inputs.no_isolation && '1' || '0' }}
+      CROSSDESK_XMAKE_NO_ISOLATION: "0"
 
     steps:
       - name: Checkout
