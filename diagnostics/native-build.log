@@ -1,0 +1,94 @@
+[0mchecking for Xcode SDK ... [38;5;2;1m/Applications/Xcode.app (sdk: 18.5, arm64-apple-ios15.0)[0m
+updating repositories .. [0m[38;5;2mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/gabime/spdlog/archive/refs/tags/v1.14.1.zip .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/chriskohlhoff/asio/archive/refs/tags/asio-1-32-0.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall nlohmann_json v3.11.3 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall asio 1.32.0 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/Kitware/CMake/releases/download/v3.30.2/cmake-3.30.2-macos-universal.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/zaphoyd/websocketpp/archive/refs/tags/0.8.2.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall spdlog v1.14.1 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall cmake~host 3.30.2 [2m(binary)[0m .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/kunkundi/openfec/archive/refs/tags/1.4.2.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/openssl/openssl/archive/refs/tags/openssl-3.3.2.zip .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://downloads.xiph.org/releases/opus/opus-1.5.1.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall openfec 1.4.2 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall websocketpp 0.8.2 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mclone https://github.com/kunkundi/libyuv.git 2025.8.14 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/cameron314/concurrentqueue/archive/refs/tags/v1.0.4.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall concurrentqueue v1.0.4 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall libopus 1.5.1 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/libffi/libffi/releases/download/v3.4.8/libffi-3.4.8.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/mesonbuild/meson/releases/download/1.12.1/meson-1.12.1.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall libyuv 2025.8.14 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall libffi 3.4.8 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/madler/zlib/archive/refs/tags/v1.4.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.47/pcre2-10.47.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall zlib v1.4 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/nghttp2/nghttp2/releases/download/v1.68.0/nghttp2-1.68.0.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall meson~host 1.12.1 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://sqlite.org/2025/sqlite-autoconf-3500400.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall pcre2 10.47 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://download.gnome.org/sources/glib/2.84/glib-2.84.1.tar.xz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall nghttp2 1.68.0 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/rockdaboot/libpsl/releases/download/0.21.5/libpsl-0.21.5.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall sqlite3 3.50.0+400 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall upnp-libpsl 0.21.5 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/xmake-mirror/nasm/releases/download/nasm-2.16.03/nasm-2.16.03.tar.xz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://download.gnome.org/sources/libxml2/2.14/libxml2-2.14.6.tar.xz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall upnp-libxml2 2.14.6 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0mdownload https://github.com/skywind3000/kcp/archive/refs/tags/1.7.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall nasm~host 2.16.03 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall kcp 1.7 .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall glib 2.84.1 .. [38;5;1;1mfailed[0m
+
+From https://github.com/frida/proxy-libintl
+ * branch            33934de09af6a6627eb44e310a8079df009abdbb -> FETCH_HEAD
+HEAD is now at 33934de Drop c_std=gnu99 to avoid Meson deprecation warning
+e
+Build dir: /Users/runner/.xmake/cache/packages/2611/g/glib/2.84.1/source/build_87119a69
+Build type: cross build
+DEPRECATION: Option "dtrace" value 'false' is replaced by 'disabled'
+DEPRECATION: Option "man" is replaced by 'man-pages'
+DEPRECATION: Option "man-pages" value 'false' is replaced by 'disabled'
+DEPRECATION: Option "gtk_doc" is replaced by 'documentation'
+DEPRECATION: Option "systemtap" value 'false' is replaced by 'disabled'
+Project name: glib
+Project version: 2.84.1
+C compiler for the host machine: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang (clang 17.0.0 "Apple clang version 17.0.0 (clang-1700.0.13.5)")
+C linker for the host machine: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang ld64 1167.5
+Compiler for language c for the build machine not found.
+Build machine cpu family: aarch64
+[0mif you want to get more verbose errors, please see:[0m
+[0m  -> [1m/Users/runner/.xmake/cache/packages/2611/g/glib/2.84.1/installdir.failed/logs/install.txt[0m
+[0m[38;5;3m  => [0mclone https://code.videolan.org/videolan/dav1d.git 1.4.3 .. [38;5;1;1mfailed[0m
+
+we can also download these packages manually:
+[0m  [38;5;3m- https://code.videolan.org/videolan/dav1d.git[0m
+[0mto the local search directories: [1m[0m
+[0m  [1m- dav1d[0m
+[0mand we can run `xmake g --pkg_searchdirs=/xxx` to set the search directories.[0m
+[0m[38;5;3m  => [0minstall openssl3 3.3.2 .. [38;5;1;1mfailed[0m
+
+DEBUG: all keys: APPLINKDIR, BINDIR, CMAKECONFIGDIR, ENGINESDIR, INCLUDEDIR, LDLIBS, LIBDIR, MODULESDIR, PKGCONFIGDIR, PREFIX, VERSION, libdir
+DEBUG: PREFIX = /Users/runner/work/crossdesk-ios15/crossdesk-ios15/apps/ios/.xmake/packages/o/openssl3/3.3.2/b331254d12064578b35bfd0161c850a0 => PREFIX = /Users/runner/work/crossdesk-ios15/crossdesk-ios15/apps/ios/.xmake/packages/o/openssl3/3.3.2/b331254d12064578b35bfd0161c850a0
+DEBUG: libdir = /Users/runner/work/crossdesk-ios15/crossdesk-ios15/apps/ios/.xmake/packages/o/openssl3/3.3.2/b331254d12064578b35bfd0161c850a0/lib => libdir = /Users/runner/work/crossdesk-ios15/crossdesk-ios15/apps/ios/.xmake/packages/o/openssl3/3.3.2/b331254d12064578b35bfd0161c850a0/lib
+DEBUG: BINDIR = bin => BINDIR = /Users/runner/work/crossdesk-ios15/crossdesk-ios15/apps/ios/.xmake/packages/o/openssl3/3.3.2/b331254d12064578b35bfd0161c850a0/bin, BINDIR_REL_PREFIX = bin
+DEBUG: LIBDIR = lib => LIBDIR = /Users/runner/work/crossdesk-ios15/crossdesk-ios15/apps/ios/.xmake/packages/o/openssl3/3.3.2/b331254d12064578b35bfd0161c850a0/lib, LIBDIR_REL_PREFIX = lib
+DEBUG: INCLUDEDIR = include => INCLUDEDIR = /Users/runner/work/crossdesk-ios15/crossdesk-ios15/apps/ios/.xmake/packages/o/openssl3/3.3.2/b331254d12064578b35bfd0161c850a0/include, INCLUDEDIR_REL_PREFIX = include
+DEBUG: APPLINKDIR = include/openssl => APPLINKDIR = /Users/runner/work/crossdesk-ios15/crossdesk-ios15/apps/ios/.xmake/packages/o/openssl3/3.3.2/b331254d12064578b35bfd0161c850a0/include/openssl, APPLINKDIR_REL_PREFIX = include/openssl
+DEBUG: ENGINESDIR = /Users/runner/work/crossdesk-ios15/crossdesk-ios15/apps/ios/.xmake/packages/o/openssl3/3.3.2/b331254d12064578b35bfd0161c850a0/lib/engines-3 => ENGINESDIR = /Users/runner/work/crossdesk-ios15/crossdesk-ios15/apps/ios/.xmake/packages/opt/homebrew/Cellar/perl/5.44.0/bin/perl "-I." "-Iutil/perl" "-Mconfigdata" "-MOpenSSL::paramnames" "util/dofile.pl" "-oMakefile" include/internal/param_names.h.in > include/internal/param_names.h
+/opt/homebrew/Cellar/perl/5.44.0/bin/perl "-I." "-Mconfigdata" "util/dofile.pl" "-oMakefile" include/openssl/asn1.h.in > include/openssl/asn1.h
+/opt/homebrew/Cellar/perl/5.44.0/bin/perl "-I." "-Mconfigdata" "util/dofile.pl" "-oMakefile" include/openssl/asn1t.h.in > include/openssl/asn1t.h
+/opt/homebrew/Cellar/perl/5.44.0/bin/perl "-I." "-Mconfigdata" "util/dofile.pl" "-oMakefile" include/openssl/bio.h.in > include/openssl/bio.h
+/opt/homebrew/Cellar/perl/5.44.0/bin/perl "-I." "-Mconfigdata" "util/dofile.pl" "-oMakefile" include/openssl/cmp.h.in > include/openssl/cmp.h
+/opt/homebrew/Cellar/perl/5.44.0/bin/perl "-I." "-Mconfigdata" "util/dofile.pl" "-oMakefile" include/openssl/cms.h.in > include/openssl/cms.h
+/opt/homebrew/Cellar/perl/5.44.0/bin/perl "-I." "-Mconfigdata" "util/dofile.pl" "-oMakefile" include/openssl/conf.h.in > include/openssl/conf.h
+/opt/homebrew/Cellar/perl/5.44.0/bin/perl "-I." "-Iutil/perl" "-Mconfigdata" "-MOpenSSL::paramnames" "util/dofile.pl" "-oMakefile" include/openssl/core_names.h.in > include/openssl/core_names.h
+/opt/homebrew/Cellar/perl/5.44.0/bin/perl "-I." "-Mconfigdata" "util/dofile.pl" "-oMakefile" include/openssl/crmf.h.in > include/openssl/crmf.h
+/opt/homebrew/Cellar/perl/5.44.0/bin/perl "-I." "-Mconfigdata" "util/dofile.pl" "-oMakefile" include/openssl/crypto.h.in > include/openssl/crypto.h
+[0mif you want to get more verbose errors, please see:[0m
+[0m  -> [1m/Users/runner/.xmake/cache/packages/2611/o/openssl3/3.3.2/installdir.failed/logs/install.txt[0m
+[0m[38;5;3m  => [0mdownload https://github.com/cisco/openh264/archive/refs/tags/v2.6.0.tar.gz .. [38;5;2;1mok[0m
+[0m[38;5;3m  => [0minstall openh264 v2.6.0 .. [38;5;2;1mok[0m
+[0m[1;38;5;1;1merror: [0minstall failed![0m
